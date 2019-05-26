@@ -4,6 +4,7 @@ import os
 import urllib.parse
 
 import flask
+import requests
 from werkzeug.security import safe_str_cmp
 
 bp = flask.Blueprint('views', __name__)
@@ -18,16 +19,16 @@ def home():
 
 @bp.route('/googleauth')
 def redirect_to_googleauth():
+    config = flask.current_app.config
+
     state = _b64(hashlib.sha256(os.urandom(1024)).digest())
     flask.session['state'] = state
-
-    config = flask.current_app.config
     
     qs = urllib.parse.urlencode([
         ('client_id', config['GOOGLE_OAUTH_CLIENT_ID']),
         ('response_type', 'code'),
         ('scope', 'openid email profile'),
-        ('redirect_uri', 'https://nickfrost.rocks/oauth'),
+        ('redirect_uri', config['GOOGLE_OAUTH_REDIRECT_URI']),
         ('state', state),
     ])
     google_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + qs
@@ -36,7 +37,22 @@ def redirect_to_googleauth():
 
 @bp.route('/oauth')
 def oauth_authorize():
+    config = flask.current_app.config
+
     state = request.args['state']
     if not safe_str_cmp(state, request.session['state']):
-        return '', 400
-    return 'hmm', 500
+        return 'Invalid state parameter', 400
+
+    code = request.args['code']
+    rv = requests.post(
+        'https://oauth2.googleapis.com/token',
+        data={
+            'code': code,
+            'client_id': config['GOOGLE_OAUTH_CLIENT_ID'],
+            'client_secret': config['GOOGLE_OAUTH_CLIENT_SECRET'],
+            'redirect_uri': config['GOOGLE_OAUTH_REDIRECT_URI'],
+            'grant_type': 'authorization_code',
+        },
+    )
+
+    return rv.text, {'Content-Type': 'application/json'}
