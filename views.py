@@ -29,7 +29,6 @@ def redirect_to_googleauth():
         ('scope', 'openid email profile'),
         ('redirect_uri', 'https://nickfrost.rocks/oauth'),
         ('state', state),
-        ('nonce', ''),
     ])
     google_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + qs
     return flask.redirect(google_url)
