@@ -39,11 +39,11 @@ def redirect_to_googleauth():
 def oauth_authorize():
     config = flask.current_app.config
 
-    state = request.args['state']
-    if not safe_str_cmp(state, request.session['state']):
+    state = flask.request.args['state']
+    if not safe_str_cmp(state, flask.session['state']):
         return 'Invalid state parameter', 400
 
-    code = request.args['code']
+    code = flask.request.args['code']
     rv = requests.post(
         'https://oauth2.googleapis.com/token',
         data={
