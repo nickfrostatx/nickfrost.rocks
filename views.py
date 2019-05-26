@@ -4,6 +4,7 @@ import os
 import urllib.parse
 
 import flask
+import jwt
 import requests
 from werkzeug.security import safe_str_cmp
 
@@ -15,7 +16,11 @@ def _b64(data):
 
 @bp.route('/')
 def home():
-    return flask.render_template('home.html')
+    if flask.session.get('logged_in'):
+        return flask.render_template('why.html')
+    else:
+        return flask.render_template('home.html')
+
 
 @bp.route('/googleauth')
 def redirect_to_googleauth():
@@ -54,5 +59,16 @@ def oauth_authorize():
             'grant_type': 'authorization_code',
         },
     )
+    if not rv.ok:
+        raise Exception(rv.text)
+    id_token = rv.json()['id_token']
+    # Google just gave this to us over HTTPS. We don't need to bother with
+    # verifying the signature.
+    profile = jwt.decode(id_token, verify=False)
 
-    return rv.text, {'Content-Type': 'application/json'}
+    flask.session['logged_in'] = True
+    flask.session['name'] = profile['name']
+    flask.session['email'] = profile['email']
+    flask.session['picture'] = profile['picture']
+
+    return flask.redirect(flask.url_for('.home'))
