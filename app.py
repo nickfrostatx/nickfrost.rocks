@@ -10,6 +10,7 @@ def create_app():
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
     )
+    app.register_blueprint(views.bp)
 
     if 'SENTRY_DSN' in app.config:
         import sentry_sdk
@@ -19,7 +20,6 @@ def create_app():
             integrations=[FlaskIntegration()],
         )
 
-    app.register_blueprint(views.bp)
     return app
 
 
