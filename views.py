@@ -47,6 +47,7 @@ def oauth_authorize():
     state = flask.request.args['state']
     if not safe_str_cmp(state, flask.session['state']):
         return 'Invalid state parameter', 400
+    del flask.session['state']
 
     code = flask.request.args['code']
     rv = requests.post(
@@ -66,6 +67,7 @@ def oauth_authorize():
     # verifying the signature.
     profile = jwt.decode(id_token, verify=False)
 
+    flask.session.permanent = True
     flask.session['logged_in'] = True
     flask.session['name'] = profile['name']
     flask.session['email'] = profile['email']
