@@ -10,6 +10,15 @@ def create_app():
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
     )
+
+    if 'SENTRY_DSN' in app.config:
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        sentry_sdk.init(
+            dsn=app.config['SENTRY_DSN'],
+            integrations=[FlaskIntegration()],
+        )
+
     app.register_blueprint(views.bp)
     return app
 
