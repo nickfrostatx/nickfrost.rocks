@@ -74,3 +74,8 @@ def oauth_authorize():
     flask.session['picture'] = profile['picture']
 
     return flask.redirect(flask.url_for('.home'))
+
+
+@bp.route('/gimme500')
+def sentry_debug():
+    return 1 / 0
