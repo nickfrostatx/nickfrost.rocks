@@ -1,5 +1,6 @@
 import flask
 
+import bin
 import views
 
 
@@ -11,6 +12,7 @@ def create_app():
         SESSION_COOKIE_HTTPONLY=True,
     )
     app.register_blueprint(views.bp)
+    app.register_blueprint(bin.bp)
 
     if 'SENTRY_DSN' in app.config:
         import sentry_sdk

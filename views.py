@@ -16,7 +16,7 @@ def _b64(data):
 
 @bp.route('/')
 def home():
-    if flask.session.get('logged_in'):
+    if flask.session.get('logged_in', False):
         return flask.render_template('why.html')
     else:
         return flask.render_template('home.html')
@@ -74,8 +74,3 @@ def oauth_authorize():
     flask.session['picture'] = profile['picture']
 
     return flask.redirect(flask.url_for('.home'))
-
-
-@bp.route('/gimme500')
-def sentry_debug():
-    return 1 / 0
