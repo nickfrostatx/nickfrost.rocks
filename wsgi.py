@@ -4,5 +4,6 @@ _app = None
 
 def wsgi(environ, start_response):
     global _app
-    _app = create_app()
+    if _app is None:
+        _app = create_app()
     return _app(environ, start_response)
